@@ -2,12 +2,12 @@ import * as THREE from "three";
 import React, { Suspense, useRef, useCallback } from "react";
 import { Canvas, useFrame } from "@react-three/fiber";
 import { Physics, useSphere, useBox, usePlane } from "@react-three/cannon";
-import { useGLTF, Text, PerspectiveCamera } from "@react-three/drei";
+import { useGLTF, Text } from "@react-three/drei";
 import { Html } from "@react-three/drei"; 
 import lerp from "lerp";
 import clamp from "lodash-es/clamp";
 import create from "zustand";
-import pingSound from "./resources/ping.mp3";
+import pingSound from "./resources/soappop.mp3";
 
 const ping = new Audio(pingSound);
 const [useStore] = create((set) => ({
@@ -28,7 +28,7 @@ function Paddle() {
   const { nodes, materials } = useGLTF("/pingpong.glb");
   const { pong } = useStore((state) => state.api);
   const welcome = useStore((state) => state.welcome);
-  const count = useStore(state => state.count);
+  const count = useStore((state) => state.count);
   const model = useRef();
   const [ref, api] = useBox(() => ({
     type: "Kinematic",
@@ -44,12 +44,9 @@ function Paddle() {
   useFrame((state) => {
     values.current[0] = lerp(values.current[0], (state.mouse.x * Math.PI) / 5, 0.2);
     values.current[1] = lerp(values.current[1], (state.mouse.x * Math.PI) / 5, 0.2);
-    
     api.position.set(state.mouse.x * 10, state.mouse.y * 5, 0);
     api.rotation.set(0, 0, values.current[1]);
-    
     api.wakeUp();
-    
     model.current.rotation.x = lerp(model.current.rotation.x, welcome ? Math.PI / 2 : 0, 0.2);
     model.current.rotation.y = values.current[0];
   });
@@ -59,29 +56,31 @@ function Paddle() {
       <Html position={[-8, 5, 0]} style={{ position: "absolute", top: "10px", left: "10px", color: "white", fontSize: "20px" }}>
         Score: {count}
       </Html>
-    <mesh ref={ref} dispose={null}>
-      <group ref={model} position={[-0.05, 0.37, 0.3]} scale={[0.15, 0.15, 0.15]}>
-      <Text rotation={[-Math.PI / 2, 0, 0]} position={[0, 1.5, 2]} color="white" size={1} children={count.toString()} />
-        <group rotation={[1.877, -0.345, 2.323]} scale={2.968}>
-          <primitive object={nodes.Bone} />
-          <primitive object={nodes.Bone003} />
-          <primitive object={nodes.Bone006} />
-          <primitive object={nodes.Bone010} />
-          <skinnedMesh
-            geometry={nodes.arm.geometry}
-            material={materials.glove}
-            skeleton={nodes.arm.skeleton}
+      <mesh ref={ref} dispose={null}>
+        <group ref={model} position={[-0.05, 0.37, 0.3]} scale={[0.15, 0.15, 0.15]}>
+          <Text
+            rotation={[-Math.PI / 2, 0, 0]}
+            position={[0, 1.5, 2]}
+            color="white"
+            size={1}
+            children={count.toString()}
           />
+          <group rotation={[1.877, -0.345, 2.323]} scale={2.968}>
+            <primitive object={nodes.Bone} />
+            <primitive object={nodes.Bone003} />
+            <primitive object={nodes.Bone006} />
+            <primitive object={nodes.Bone010} />
+            <skinnedMesh geometry={nodes.arm.geometry} material={materials.glove} skeleton={nodes.arm.skeleton} />
+          </group>
+          <group position={[0.405, 0, -0.373]} rotation={[0, -0.038, 0]} scale={141.943}>
+            <mesh geometry={nodes.mesh.geometry} material={materials.wood} />
+            <mesh geometry={nodes.mesh_1.geometry} material={materials.side} />
+            <mesh geometry={nodes.mesh_2.geometry} material={materials.foam} />
+            <mesh geometry={nodes.mesh_3.geometry} material={materials.lower} />
+            <mesh geometry={nodes.mesh_4.geometry} material={materials.upper} />
+          </group>
         </group>
-        <group position={[0.405, 0, -0.373]} rotation={[0, -0.038, 0]} scale={141.943}>
-          <mesh geometry={nodes.mesh.geometry} material={materials.wood} />
-          <mesh geometry={nodes.mesh_1.geometry} material={materials.side} />
-          <mesh geometry={nodes.mesh_2.geometry} material={materials.foam} />
-          <mesh geometry={nodes.mesh_3.geometry} material={materials.lower} />
-          <mesh geometry={nodes.mesh_4.geometry} material={materials.upper} />
-        </group>
-      </group>
-    </mesh>
+      </mesh>
     </>
   );
 }
@@ -105,7 +104,7 @@ function Ball() {
       <group scale={[0.5, 0.5, 0.5]}>
         <mesh
           geometry={nodes.Sphere.geometry}
-          material={materials['Material.002']}
+          material={materials["Material.002"]}
           material-transparent
           material-opacity={0.8}
         />
@@ -158,10 +157,11 @@ export default function App() {
             frictionEquationRelaxation: 2,
           }}
           gravity={[0, -40, 0]}
-          allowSleep={false}>
+          allowSleep={false}
+        >
           <mesh position={[0, 0, -10]} receiveShadow>
             <planeBufferGeometry attach="geometry" args={[1000, 1000]} />
-            <meshPhongMaterial attach="material" color="#f26b84" />
+            <meshPhongMaterial attach="material" color="#74c365" />
           </mesh>
           <ContactGround />
           {!welcome && <Ball />}
@@ -171,7 +171,17 @@ export default function App() {
         </Physics>
       </Canvas>
       {welcome && (
-        <div style={{ position: "absolute", top: "50%", left: "50%", transform: "translate(-50%, -50%)", color: "white" }}>
+        <div
+          style={{
+            position: "absolute",
+            top: "50%",
+            left: "50%",
+            transform: "translate(-50%, -50%)",
+            color: "white",
+            fontSize: "24px",
+            textAlign: "center",
+          }}
+        >
           Click to start
         </div>
       )}
